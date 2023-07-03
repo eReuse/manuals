@@ -31,6 +31,14 @@ class Guide(db.Model):
         url = f'https://guide-images.cdn.ifixit.com/igi/{img}.full'
         return url
 
+    def get_json(self):
+        return {
+            'url': self.url,
+            'image': self.image,
+            'title': self.title,
+            'category': self.category.name
+        }
+
 
 class Icecat(db.Model):
     id = Column(BigInteger, primary_key=True)
