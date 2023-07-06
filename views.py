@@ -1,6 +1,8 @@
+import json
 import logging
 from flask import Blueprint, jsonify, request
 from flask.views import View
+from sqlalchemy import or_
 from models import Category, Guide, Icecat
 
 
@@ -29,7 +31,8 @@ class ManualsMix(View):
         return res
 
     def get_params(self):
-        req = request.get_json()
+        # import pdb; pdb.set_trace()
+        req = json.loads(request.data)
         self.manufacturer = req.get('manufacturer')
         self.model = req.get('model')
         self.q = req.get('query')
@@ -66,21 +69,36 @@ class IfixitView(ManualsMix):
 
 class IcecatView(ManualsMix):
     def query(self):
-        query = Guide.query
+        query = Icecat.query
 
         if self.manufacturer:
             query = query.filter(
-                Guide.title.icontains(self.manufacturer)
+                or_(
+                    Icecat.title.icontains(self.manufacturer),
+                    Icecat.brand.icontains(self.manufacturer),
+                    Icecat.product_name.icontains(self.manufacturer),
+                    Icecat.long_product_name.icontains(self.manufacturer),
+                )
             )
 
         if self.model:
             query = query.filter(
-                Guide.title.icontains(self.model)
+                or_(
+                    Icecat.title.icontains(self.model),
+                    Icecat.brand.icontains(self.model),
+                    Icecat.product_name.icontains(self.model),
+                    Icecat.long_product_name.icontains(self.model),
+                )
             )
 
         if self.q:
             query = query.filter(
-                Guide.title.icontains(self.q)
+                or_(
+                    Icecat.title.icontains(self.q),
+                    Icecat.brand.icontains(self.q),
+                    Icecat.product_name.icontains(self.q),
+                    Icecat.long_product_name.icontains(self.q),
+                )
             )
         return query
 

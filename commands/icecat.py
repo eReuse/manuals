@@ -20,7 +20,7 @@ class Geticecat:
         self.get_resources()
 
     def get_resources(self):
-        for id in self.new_ids[:20]:
+        for id in self.new_ids:
             base = 'https://live.icecat.biz/api?UserName=openIcecat-live'
             url = f'{base}&Language=en&icecat_id={id}'
             res = requests.get(url).json()
@@ -61,7 +61,7 @@ class Geticecat:
         return mktime(date_object.timetuple())
 
     def get_ids(self):
-        f= "icecat_files/icecat_daily_export_urls.txt"
+        f= "icecat_files/export_urls1.txt"
         if self.file:
             f = self.file
         actual_ids = []
