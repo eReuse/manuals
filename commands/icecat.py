@@ -35,7 +35,7 @@ class Geticecat:
         if not info:
             return
 
-        image = icecat_json.get('Image', {}) or {}
+        image = icecat_json.get('data', {}).get('Image', {}) or {}
         icecat = Icecat(
             id=info['IcecatId'],
             date=self.get_date(info),
