@@ -21,7 +21,7 @@ class ManualsMix(View):
             res = self.get_values()
         except Exception as err:
             logger.error("Error: {}".format(err))
-            res = {"Ok": "Hello world!"}
+            res = []
         return jsonify(res)
 
     def get_values(self):
@@ -31,7 +31,6 @@ class ManualsMix(View):
         return res
 
     def get_params(self):
-        # import pdb; pdb.set_trace()
         req = json.loads(request.data)
         self.manufacturer = req.get('manufacturer')
         self.model = req.get('model')
