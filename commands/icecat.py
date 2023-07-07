@@ -27,7 +27,7 @@ class Geticecat:
             if not res or res.get('Code') == 404:
                 continue
             self.create_icecat(res)
-            sleep(5)
+            sleep(2)
         db.session.commit()
 
     def create_icecat(self, icecat_json):
