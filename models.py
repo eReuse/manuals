@@ -70,3 +70,12 @@ class Icecat(db.Model):
     @property
     def date_str(self):
         return datetime.datetime.fromtimestamp(self.date).strftime("%d/%m/%Y")
+
+    def get_json(self):
+        return {
+            'url': self.url,
+            'logo': self.brand_logo,
+            'title': self.title,
+            'pdf': self.pdf,
+            "image": self.image,
+        }
