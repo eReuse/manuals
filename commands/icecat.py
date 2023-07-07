@@ -61,7 +61,7 @@ class Geticecat:
         return mktime(date_object.timetuple())
 
     def get_ids(self):
-        f= "icecat_files/export_urls1.txt"
+        f= "icecat_files/export_urls.txt"
         if self.file:
             f = self.file
         actual_ids = []
