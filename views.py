@@ -3,7 +3,8 @@ import logging
 from flask import Blueprint, jsonify, request
 from flask.views import View
 from sqlalchemy import or_
-from models import Category, Guide, Icecat
+from models import Guide, Icecat, computer_laer
+from models import Category
 
 
 logger = logging.getLogger(__name__)
@@ -66,6 +67,27 @@ class IfixitView(ManualsMix):
         return query
 
 
+class LaerView(ManualsMix):
+    def query(self):
+        query = computer_laer.query
+
+        if self.manufacturer:
+            query = query.filter(
+                computer_laer.title.icontains(self.manufacturer)
+            )
+
+        if self.model:
+            query = query.filter(
+                computer_laer.title.icontains(self.model)
+            )
+
+        if self.q:
+            query = query.filter(
+                computer_laer.title.icontains(self.q)
+            )
+        return query
+
+
 class IcecatView(ManualsMix):
     def query(self):
         query = Icecat.query
@@ -104,3 +126,4 @@ class IcecatView(ManualsMix):
 
 ifixit.add_url_rule('/ifixit', view_func=IfixitView.as_view('ifixit'))
 ifixit.add_url_rule('/icecat', view_func=IcecatView.as_view('icecat'))
+ifixit.add_url_rule('/laer', view_func=LaerView.as_view('laer'))

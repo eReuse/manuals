@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import BigInteger, Column, ForeignKey, UnicodeText
+from sqlalchemy import BigInteger, SmallInteger, Column, ForeignKey, UnicodeText
 from sqlalchemy.orm import backref, relationship
 from manager import db
 
@@ -78,4 +78,31 @@ class Icecat(db.Model):
             'title': self.title,
             'pdf': self.pdf,
             "image": self.image,
+        }
+
+
+class Laer(db.Model):
+    id = Column(BigInteger, primary_key=True)
+    code = Column(UnicodeText(), nullable=True)
+    metal = Column(SmallInteger(), nullable=True)
+    plastic_post_consumer = Column(SmallInteger(), nullable=True)
+    plastic_post_industry = Column(SmallInteger(), nullable=True)
+
+
+class computer_laer(db.Model):
+    id = Column(BigInteger, primary_key=True)
+    title = Column(UnicodeText(), nullable=False)
+    laer_id = Column(BigInteger, ForeignKey(Laer.id), nullable=False)
+    laer = relationship(
+        Laer,
+        backref=backref('computers', lazy=True, cascade="all,delete"),
+        primaryjoin=Laer.id == laer_id,
+    )
+
+    def get_json(self):
+        return {
+            'code': self.laer.code,
+            'metal': self.laer.metal,
+            'plastic_post_consumer': self.laer.plastic_post_consumer,
+            'plastic_post_industry': self.laer.plastic_post_industry
         }
