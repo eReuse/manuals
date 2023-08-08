@@ -1,5 +1,6 @@
 import json
 import logging
+from sodapy import Socrata
 from flask import Blueprint, jsonify, request
 from flask.views import View
 from sqlalchemy import or_
@@ -10,11 +11,11 @@ from models import Category
 logger = logging.getLogger(__name__)
 
 
-ifixit = Blueprint('ifixit', __name__, url_prefix='/')
+ifixit = Blueprint("ifixit", __name__, url_prefix="/")
 
 
 class ManualsMix(View):
-    methods = ['POST']
+    methods = ["POST"]
 
     def dispatch_request(self):
         try:
@@ -28,20 +29,23 @@ class ManualsMix(View):
     def get_values(self):
         res = []
         for q in self.query():
-            res.append(q.get_json())
+            if isinstance(q, dict):
+                res.append(q)
+            else:
+                res.append(q.get_json())
         return res
 
     def get_params(self):
         req = json.loads(request.data)
-        self.manufacturer = req.get('manufacturer')
-        self.model = req.get('model')
-        self.q = req.get('query')
+        self.manufacturer = req.get("manufacturer")
+        self.model = req.get("model")
+        self.q = req.get("query")
         if not any([self.manufacturer, self.model, self.q]):
-            raise Exception('No there are any query')
+            raise Exception("No there are any query")
 
     def query(self):
         """
-            Need to implement
+        Need to implement
         """
         return []
 
@@ -51,19 +55,13 @@ class IfixitView(ManualsMix):
         query = Guide.query
 
         if self.manufacturer:
-            query = query.filter(
-                Guide.title.icontains(self.manufacturer)
-            )
+            query = query.filter(Guide.title.icontains(self.manufacturer))
 
         if self.model:
-            query = query.filter(
-                Guide.title.icontains(self.model)
-            )
+            query = query.filter(Guide.title.icontains(self.model))
 
         if self.q:
-            query = query.filter(
-                Guide.title.icontains(self.q)
-            )
+            query = query.filter(Guide.title.icontains(self.q))
         return query
 
 
@@ -72,19 +70,13 @@ class LaerView(ManualsMix):
         query = computer_laer.query
 
         if self.manufacturer:
-            query = query.filter(
-                computer_laer.title.icontains(self.manufacturer)
-            )
+            query = query.filter(computer_laer.title.icontains(self.manufacturer))
 
         if self.model:
-            query = query.filter(
-                computer_laer.title.icontains(self.model)
-            )
+            query = query.filter(computer_laer.title.icontains(self.model))
 
         if self.q:
-            query = query.filter(
-                computer_laer.title.icontains(self.q)
-            )
+            query = query.filter(computer_laer.title.icontains(self.q))
         return query
 
 
@@ -124,6 +116,41 @@ class IcecatView(ManualsMix):
         return query
 
 
-ifixit.add_url_rule('/ifixit', view_func=IfixitView.as_view('ifixit'))
-ifixit.add_url_rule('/icecat', view_func=IcecatView.as_view('icecat'))
-ifixit.add_url_rule('/laer', view_func=LaerView.as_view('laer'))
+class EnergyStarView(ManualsMix):
+    limit = 2000
+    offset = 0
+    client = Socrata("data.energystar.gov", None)
+    path = "j7nq-iepp"
+
+    def query(self):
+        where = self.params()
+        if not where:
+            return []
+
+        results = self.client.get(
+            self.path,
+            limit=self.limit,
+            offset=self.offset,
+            q=where,
+        )
+
+        return results
+
+    def params(self):
+        where = ""
+        if self.manufacturer:
+            where = self.manufacturer
+
+        if self.model:
+            where += " " + self.model
+
+        if self.q:
+            where += " " + self.q
+
+        return where
+
+
+ifixit.add_url_rule("/ifixit", view_func=IfixitView.as_view("ifixit"))
+ifixit.add_url_rule("/icecat", view_func=IcecatView.as_view("icecat"))
+ifixit.add_url_rule("/laer", view_func=LaerView.as_view("laer"))
+ifixit.add_url_rule("/energystar", view_func=EnergyStarView.as_view("energystar"))
